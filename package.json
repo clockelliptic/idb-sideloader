@@ -9,6 +9,13 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "indexeddb",
+    "static",
+    "asset",
+    "cache"
+  ],
+  "repository": "https://github.com/clockelliptic/idb-sideloader.git",
   "scripts": {
     "dev": "tsc && vite build --watch",
     "start": "vite --host --open",
