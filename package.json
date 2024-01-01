@@ -1,8 +1,8 @@
 {
-  "name": "vite-typescript-npm-package",
+  "name": "idb-sideloader",
   "version": "1.0.0",
-  "description": "Vite TypeScript library npm package template",
-  "license": "ISC",
+  "description": "A tiny Javascript + TypeScript library for caching static assets",
+  "license": "MIT",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "url-search-params-polyfill": "^8.2.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.46",
