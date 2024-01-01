@@ -42,27 +42,66 @@ To cache and sideload static assets:
 - Give tags a unique ID with `data-key`. The cached items are stored in the database with this key. The actual filenames of the assets can change freely, like in the case of JS build systems.
 - Load and invoke indexed-cache at the end.
 
-#### Example - React + Recoil + SWR + idb-keyval
+#### Simplest Usage - Vanilla HTML + Javascript Global Object
 
-Use-cases include webapps, PWAs, module federation, and other use-cases. Leverages [idb-keyval](https://github.com/jakearchibald/idb-keyval) for simplicity.
+```html
+<head>
+	<script src="https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.2/dist/index.iife.min.js"></script>
+</head>
+<body>
+	<img data-src="https://your-url.com/your-image.jpg" />
+	<script type="text/javascript">
+		const ic = new IDBSideloader();
+		ic.init().then(function() {
+			ic.load();
+		}).catch(function(err) {
+			console.log("error loading indexed-cache", err)
+		});
+	</script>
+</body>
+```
 
-This pattern is useful in situations where a PWA isn't feasible (i.e. extending low-code platforms with federated react component modules).
+#### Simplest Usage - Vanilla HTML + ESM Javascript
+
+```html
+<body>
+	<img data-src="https://your-url.com/your-image.jpg" />
+	<script type="module">
+		import IDBSideloader from 'https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.2/+esm'
+		const ic = new IDBSideloader();
+		ic.init().then(function() {
+			ic.load();
+		}).catch(function(err) {
+			console.log("error loading indexed-cache", err)
+		});
+	</script>
+</body>
+```
+
+#### Example - React + Recoil
+
+Use-cases include webapps, PWAs, module federation, and other use-cases.
+
+This pattern is useful in situations where an PWA isn't feasible (i.e. extending low-code platforms with federated react component modules), but where we still want to provide the user with progressive data loading for static assets.
+
+The example below shows the following:
+
+1. initializing the `IDBSideloader` cache object as a global state variable using RecoilJS
+2. initializing / re-initializing the `IDBSideloader` cache object with a `useLayoutEffect` hook component
+3. loading cached images when the user clicks on an image in an image gallery
 
 ```tsx
 import { FunctionComponent, useLayoutEffect } from 'react';
 import { atom, selector, useRecoilValue } from 'recoil';
-import { createStore } from 'idb-keyval';
-import IndexedCache from 'src/lib/utils/idb-sideloader';
+import IDBSideloader from 'src/lib/utils/idb-sideloader';
 
-// see: https://github.com/jakearchibald/idb-keyval/blob/main/custom-stores.md
-export const idbStore = () => createStore('custom-db-name', 'custom-store-name');
-
+// Initialize immediately so the state atom is never falsy
 export const idbImgStoreAtom = atom({
   key: 'idb-image-store-atom',
   default: selector({
     key: 'idb-image-store-selector',
     get: async () => {
-      const ic = new IndexedCache({});
+      const ic = new IDBSideloader({});
       await ic
         .init()
         .then(function () {
@@ -76,7 +115,8 @@ export const idbImgStoreAtom = atom({
   }),
 });
 
-export const IndexedCacheInitEffect: FunctionComponent = () => {
+// Re-initialize on initial app render to guarantee images are loaded
+export const IDBSideloaderInitEffect: FunctionComponent = () => {
   const cache = useRecoilValue(idbImgStoreAtom);
   useLayoutEffect(
     () => {
@@ -95,6 +135,7 @@ export const IndexedCacheInitEffect: FunctionComponent = () => {
   return null;
 };
 
+// Load cache data when user-actions load images into the DOM
 export const SelectedImage: FunctionComponent<{
 	imgSrc: string,
 	otherImages: string[]
@@ -108,63 +149,6 @@ export const SelectedImage: FunctionComponent<{
 };
 ```
 
-
-#### Example - Vanilla HTML + JavaScript
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>indexed-cache</title>
-    <meta charset="utf-8" />
-
-    <script data-key="bundle" data-src="bundle_file1234.js"></script>
-
-    <link rel="stylesheet" type="text/css"
-        data-key="style.css"
-        data-src="style.css" />
-</head>
-<body>
-    <h1>indexed-cache</h1>
-
-    <script src="normal-non-side-loaded.js"></script>
-
-    <!--
-        Whenever the value of data-hash changes (eg: from a build system)
-        or the expiry (optional) is crossed, the file is re-fetched
-        and re-cached.
-    //-->
-    <script data-src="sideloaded.js"
-        data-key="mybigsideloadedscript"
-        data-hash="randomhash"
-        data-expiry="2029-03-25T12:00:00-06:30">
-    </script>
-
-    <img data-src="thumb.png"
-        data-key="thumb.png"
-        data-hash="randomhash" />
-
-    <!--
-        Always include and invoke indexed-cache at the end, right before </body>.
-        Use the unpkg CDN or download and host the script locally (dist/indexed-cache.min.js).
-    !-->
-    <script src="https://unpkg.com/@knadh/indexed-cache@0.4.3/dist/indexed-cache.min.js" nomodule></script>
-
-    <!-- Use this if you are supporting old browsers which doesn't support ES6. -->
-    <!-- <script src="https://unpkg.com/@knadh/indexed-cache@0.4.3/dist/indexed-cache.legacy.min.js" nomodule></script> -->
-
-    <script>
-        const ic = new IndexedCache();
-        ic.init().then(function() {
-            ic.load();
-        }).catch(function(err) {
-            console.log("error loading indexed-cache", err)
-        })
-    </script>
-</body>
-</html>
-```
-
 #### Example - Load modern and legacy bundle conditionally
 
 Here is an example on how to load modern(ESM) bundle and legacy bundle conditionally based on browser support.
@@ -173,8 +157,8 @@ Here is an example on how to load modern(ESM) bundle and legacy bundle condition
     <!-- Only modern browsers understand type=module and legacy browsers will skip this script -->
     <script type="module">
         // Use ESM bundle.
-        import IndexedCache from "https://unpkg.com/@knadh/indexed-cache@0.4.3/dist/indexed-cache.esm.min.js";
-        const ic = new IndexedCache();
+        import IDBSideloader from "https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.2/+esm";
+        const ic = new IDBSideloader();
         ic.init().then(function() {
             ic.load();
         }).catch(function(err) {
@@ -184,12 +168,11 @@ Here is an example on how to load modern(ESM) bundle and legacy bundle condition
 
     <!-- This will only be executed on legacy browsers which doesn't support ES6 modules.
     Modern browsers ignore the script if its tagged `nomodule`. -->
-    <script src="https://unpkg.com/@knadh/indexed-cache@0.4.4/dist/indexed-cache.legacy.min.js" nomodule></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.2/dist/index.iife.min.js" nomodule></script>
     <script nomodule>
-        const ic = new IndexedCache();
+        const ic = new IDBSideloader();
         ic.init().then(function() {
             ic.load();
-
             // Optionally trigger `onload` if there are scripts that depend on it.
             // document.dispatchEvent(new Event("load"))
         }).catch(function(err) {
@@ -203,23 +186,20 @@ Here is an example on how to load modern(ESM) bundle and legacy bundle condition
 One or more of these optional params can be passed during initialization. Default values are shown below.
 
 ```javascript
-new IndexedCache({
+new IDBSideloader({
     tags: ["script", "img", "link"],
     dbName: "indexed-cache",
     storeName: "objects",
-
     // If this is enabled, all objects in the cache with keys not
     // found on elements on the page (data-key) will be deleted.
     // This can be problematic in scenarios where there are multiple
     // pages on the same domain that have different assets, some on
     // certain pages and some on other.
     prune: false,
-
     // Enabling this skips IndexedDB caching entirely,
     // causing resources to be fetched over HTTP every time.
     // Useful in dev environments.
     skip: false,
-
     // Default expiry for an object in minutes (default 3 months).
     // Set to null for no expiry.
     expiry: 131400
