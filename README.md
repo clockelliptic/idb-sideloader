@@ -1,38 +1,10 @@
 # idb-sideloader.js
 
-WIP - New Contributors Welcome!
+Licensed under the MIT license.
 
-Taking inspiration from [indexed-cache](https://github.com/knadh/indexed-cache), *idb-sideloader* is a tiny Javascript + TypeScript library that "sideloads" static assets (script, link, and img tags) on webpages using the fetch() API and caches them in an IndexedDB store to eliminate the dependency on the standard browser static asset cache, and to eliminate HTTP requests on subsequent page loads. Javascript, CSS, and image assets are stored in IndexedDB as Blobs.
+What is `idb-sideloader`? It's a tiny Javascript + TypeScript library that "sideloads" static assets (script, link, and img tags) on webpages using the fetch() API and caches them in an IndexedDB store to eliminate dependency on the standard browser static asset cache, and to eliminate HTTP requests on subsequent page loads. Javascript, CSS, and image assets are stored in IndexedDB as Blobs.
 
 idb-sideloader makes use of [URLSearchParams Polyfill](https://github.com/jerrybendy/url-search-params-polyfill) for backward compatibility with browsers without support for `URLSearchParams.size` (i.e. Safari and some WebKit Chromium builds).
-
-### For very specific scenarios only
-
-This library is only meant to be used in very specific scenarios.
-
-Unlike the browser's asset cache, IndexedDB is not cleared automatically, providing a longer term static file storage on the client side. The lib uses ES6 (and IndexedDB) and is only expected to work on recent versions of modern browsers. Ideally, this should have been handled with ServiceWorkers, but they don't work in mobile webviews.
-
-Use if at least a few of these are true:
-
-- There are large static files (JS, CSS) that rarely change.
-- High traffic from a large number of returning users who access web pages with the same assets regularly and frequently.
-- The pages are mostly inside mobile webviews where browser cache gets evicted  (OS pressure) causing the same assets to be fetched afresh over and over wasting bandwidth.
-- Bandwidth is a concern.
-
-### Features
-
-- Supports script, img, link tags.
-- Respects `defer / async` on script tags.
-- Can invalidate cached items with a TTL per tag.
-- Can invalidate cached items with a simple random hash per tag.
-
-### Gotchas
-
-- CORS.
-- First-paint "flash" (needs to be handled manually) as scripts and styles only load after HTML is fetched and rendered by the browser.
-- Browser compatibility.
-- Empty space or line breaks between the opening and closing `<script data-src="remote.js"></script>` tags will be executed as an inline script by the browser, after which the browser will not load the remote script when applied. Ensure that the opening and closing script tags have nothing between then.
-- Scripts that rely on the `document.onload` event will need the event to be triggered for them manually once indexed-cache loads with a `document.dispatchEvent(new Event("load"));`
 
 ## Usage
 
@@ -46,7 +18,7 @@ To cache and sideload static assets:
 
 ```html
 <head>
-	<script src="https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.2/dist/index.iife.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.4/dist/index.iife.min.js"></script>
 </head>
 <body>
 	<img data-src="https://your-url.com/your-image.jpg" />
@@ -67,7 +39,7 @@ To cache and sideload static assets:
 <body>
 	<img data-src="https://your-url.com/your-image.jpg" />
 	<script type="module">
-		import IDBSideloader from 'https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.2/+esm'
+		import IDBSideloader from 'https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.4/+esm'
 		const ic = new IDBSideloader();
 		ic.init().then(function() {
 			ic.load();
@@ -157,7 +129,7 @@ Here is an example on how to load modern(ESM) bundle and legacy bundle condition
     <!-- Only modern browsers understand type=module and legacy browsers will skip this script -->
     <script type="module">
         // Use ESM bundle.
-        import IDBSideloader from "https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.2/+esm";
+        import IDBSideloader from "https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.4/+esm";
         const ic = new IDBSideloader();
         ic.init().then(function() {
             ic.load();
@@ -168,7 +140,7 @@ Here is an example on how to load modern(ESM) bundle and legacy bundle condition
 
     <!-- This will only be executed on legacy browsers which doesn't support ES6 modules.
     Modern browsers ignore the script if its tagged `nomodule`. -->
-    <script src="https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.2/dist/index.iife.min.js" nomodule></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb-sideloader@1.0.4/dist/index.iife.min.js" nomodule></script>
     <script nomodule>
         const ic = new IDBSideloader();
         ic.init().then(function() {
@@ -209,8 +181,35 @@ new IDBSideloader({
 - `load()` can be called with a DOM Node or NodeList. When none are given, it scans the entire DOM.
 - To manually prune all objects in the database except for a given list of keys, after `await init()`, call `.prune([list of keys])`.
 
-Licensed under the MIT license.
+## Use-cases
 
+### For very specific scenarios only
+
+This library is only meant to be used in very specific scenarios.
+
+Unlike the browser's asset cache, IndexedDB is not cleared automatically, providing a longer term static file storage on the client side. The lib uses ES6 (and IndexedDB) and is only expected to work on recent versions of modern browsers. Ideally, this should have been handled with ServiceWorkers, but they don't work in mobile webviews.
+
+Use if at least a few of these are true:
+
+- There are large static files (JS, CSS) that rarely change.
+- High traffic from a large number of returning users who access web pages with the same assets regularly and frequently.
+- The pages are mostly inside mobile webviews where browser cache gets evicted  (OS pressure) causing the same assets to be fetched afresh over and over wasting bandwidth.
+- Bandwidth is a concern.
+
+### Features
+
+- Supports script, img, link tags.
+- Respects `defer / async` on script tags.
+- Can invalidate cached items with a TTL per tag.
+- Can invalidate cached items with a simple random hash per tag.
+
+### Gotchas
+
+- CORS.
+- First-paint "flash" (needs to be handled manually) as scripts and styles only load after HTML is fetched and rendered by the browser.
+- Browser compatibility.
+- Empty space or line breaks between the opening and closing `<script data-src="remote.js"></script>` tags will be executed as an inline script by the browser, after which the browser will not load the remote script when applied. Ensure that the opening and closing script tags have nothing between then.
+- Scripts that rely on the `document.onload` event will need the event to be triggered for them manually once indexed-cache loads with a `document.dispatchEvent(new Event("load"));`
 
 ## Development
 

@@ -11,8 +11,6 @@
   ],
   "keywords": [
     "indexeddb",
-    "static",
-    "asset",
     "cache"
   ],
   "repository": "https://github.com/clockelliptic/idb-sideloader.git",
@@ -27,8 +25,6 @@
     "format:styles": "stylelint ./**/*.{css,scss} --fix"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "url-search-params-polyfill": "^8.2.5"
   },
   "devDependencies": {
@@ -42,6 +38,8 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.2",
     "prettier": "^3.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "stylelint": "^16.1.0",
     "stylelint-config-recommended": "^14.0.0",
     "stylelint-config-sass-guidelines": "^11.0.0",
