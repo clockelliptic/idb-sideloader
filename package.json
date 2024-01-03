@@ -1,6 +1,6 @@
 {
   "name": "idb-sideloader",
-  "version": "1.0.7",
+  "version": "2.0.0",
   "description": "A tiny Javascript + TypeScript library for caching static assets",
   "license": "MIT",
   "main": "dist/index.umd.js",

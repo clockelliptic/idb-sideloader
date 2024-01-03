@@ -11,7 +11,7 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "IDBSideloader",
-      formats: ["es", "cjs", "umd", "iife"],
+      formats: ["es", "umd", "iife"],
       fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
