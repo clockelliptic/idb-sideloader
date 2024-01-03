@@ -65,7 +65,7 @@ The example below shows the following:
 ```tsx
 import { FunctionComponent, useLayoutEffect } from 'react';
 import { atom, selector, useRecoilValue } from 'recoil';
-import IDBSideloader from 'src/lib/utils/idb-sideloader';
+import IDBSideloader from 'idb-sideloader';
 
 // Initialize immediately so the state atom is never falsy
 export const idbImgStoreAtom = atom({
